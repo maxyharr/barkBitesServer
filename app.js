@@ -4,7 +4,7 @@ var bodyParser = require('body-parser');
 
 // Mongo
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://mharris7190:J)#nd0a@ds059712.mongolab.com:59712/barkbites');
+mongoose.connect('mongodb://bbuser:jjJ#(*sD#59jskdL@ds059712.mongolab.com:59712/barkbites');
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
