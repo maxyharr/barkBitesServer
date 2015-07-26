@@ -1,8 +1,12 @@
 var express = require('express');
 var app = express();
 
-app.get('/', function (req, res) {
-  res.send('Hello World!');
+app.get('/location/:lat/:long', function (req, res) {
+  var obj = {'location': {
+    'latitude': req.params.lat,
+    'longitude': req.params.long
+  }}
+  res.send(obj);
 });
 
 var server = app.listen(3000, function () {
