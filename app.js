@@ -2,8 +2,9 @@ var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
 
-// Mongo
+// Mongo && models
 var mongoose = require('mongoose');
+require('./models/Places');
 mongoose.connect('mongodb://bbuser:jjJ#(*sD#59jskdL@ds059712.mongolab.com:59712/barkbites');
 
 // configure app to use bodyParser()
@@ -17,13 +18,14 @@ var port = process.env.PORT || 3000;
 // =============================================================================
 var router = express.Router();              // get an instance of the express Router
 
-
-
 app.get('/location/:lat/:long', function (req, res) {
-  var obj = {'location': {
-    'latitude': req.params.lat,
-    'longitude': req.params.long
-  }}
+  var obj = 
+    { 
+      'location': {
+        'latitude': req.params.lat,
+        'longitude': req.params.long
+      }
+    }
   res.send(obj);
 });
 
