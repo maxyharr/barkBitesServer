@@ -73,6 +73,7 @@ router.route('/places/:id')
         console.log('Found by googlePlaceID');
         Place.remove({_googlePlaceId: req.params.id}, function (err) {
           if (err) res.json({message: err});
+          console.log('deleting');
           res.json({message: 'Place successfully deleted.'});
         });
       }
