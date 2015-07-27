@@ -4,6 +4,9 @@ var bodyParser = require('body-parser');
 var router = express.Router();
 router.use(function (req, res, next) { next(); });
 
+// For making calls to Google Places API
+var request = require('request');
+
 // Mongo && models
 var mongoose = require('mongoose');
 require('./models/Places');
@@ -61,7 +64,7 @@ router.route('/places/:id')
         res.json(place);
       }
     });
-  })
+  });
 
 app.use('/api/v0', router);
 var port = process.env.PORT || 3000;
