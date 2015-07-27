@@ -35,15 +35,14 @@ router.route('/places')
   })
 
   .post(function (req, res) {
-    var place = Place.findOne({"googlePlaceId": req.body.googlePlaceId});
-    if (!place) {
-      Place.collection.insert(req.body, function (err) {
-        if (err) res.sendStatus(err);
-        res.json({message: 'Place created!'});
-      });
-    } else {
-      res.json({message: 'Place already created!'});
-    }
+    Place.count({googlePlaceId: req.body.googlePlaceId}, function (err, count) {
+      if (!count) {
+        new Place(req.body).save();
+        res.json({message: 'New place created!'});
+      } else {
+        res.json({message: 'Place can not be added. Already in database!'});
+      }
+    });
   });
 
 router.route('/places/:id')
@@ -72,7 +71,7 @@ router.route('/places/:id')
   });
 
 app.use('/api/v0', router);
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 7000;
 var server = app.listen(port, function () {
   var host = server.address().address;
   var port = server.address().port;

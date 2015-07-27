@@ -54,7 +54,7 @@
 	    params=''
 	    handle-as="json"
 	    method="POST"
-	    contentType="application/json"
+	    content-type="application/json"
 	    on-response="handleResponse"
       last-response="{{response}}"
 	    debounce-duration="300"
@@ -97,11 +97,14 @@
           var restriction = self.selected;
           var notes = self.barknotes;
 
-          var body = {"petRestriction": restriction,
-                      "googlePlaceId": placeId,
-                      "notes": notes}
+          var query =
+            {
+              'googlePlaceId': placeId,
+              'petRestriction': restriction,
+              'notes': notes
+            };
 
-          self.$.ajax.body = body;
+          self.$.ajax.body = JSON.stringify(query);
           self.$.ajax.generateRequest();
         } else {
           alert("Must Enter a Place ID");
@@ -109,7 +112,7 @@
       },
 
       handleResponse: function () {
-        alert(this.response);
+        alert(this.response.message);
       }
     });
   </script>
