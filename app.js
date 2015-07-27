@@ -7,6 +7,11 @@ router.use(function (req, res, next) { next(); });
 // For making calls to Google Places API
 var request = require('request');
 
+app.use(express.static(__dirname + '/public'));
+app.get('/', function(req, res) {
+  res.sendfile('./public/index.html'); // load the single view file
+});
+
 // Mongo && models
 var mongoose = require('mongoose');
 require('./models/Places');
@@ -67,7 +72,7 @@ router.route('/places/:id')
   });
 
 app.use('/api/v0', router);
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 80;
 var server = app.listen(port, function () {
   var host = server.address().address;
   var port = server.address().port;

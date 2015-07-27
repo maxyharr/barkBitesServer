@@ -1,0 +1,117 @@
+<link rel="import" href="/bower_components/polymer/polymer.html">
+<link rel="import" href="/bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="/bower_components/iron-form/iron-form.html">
+<link rel="import" href="/bower_components/iron-input/iron-input.html">
+<link rel="import" href="/bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="/bower_components/paper-input/paper-input.html">
+<link rel="import" href="/bower_components/paper-item/paper-item.html">
+<link rel="import" href="/bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="/bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="/bower_components/paper-radio-button/paper-radio-button.html">
+<link rel="import" href="/bower_components/paper-radio-group/paper-radio-group.html">
+<link rel="import" href="/bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="/bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="/bower_components/paper-button/paper-button.html">
+
+<link rel="import" href="/components/bb-calendar/bb-calendar.html">
+
+<dom-module id="bb-admin-page">
+
+  <!-- scoped CSS for this element -->
+  <style>
+    paper-input {
+      display: inline-block;
+    }
+    paper-radio-group {
+      display: block;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+    paper-radio-button {
+      display: block;
+      padding: 0;
+      margin: 0;
+    }
+    paper-button {
+      background-color: blue;
+      color: white;
+    }
+    #notes-input {
+      width: 100%;
+    }
+
+    #notes-section {
+      border: 1px solid black;
+      min-height: 20px;
+    }
+
+  </style>
+
+  <template>
+  	<iron-ajax
+      id="ajax"
+	    url="http://localhost:3000/api/v0/places"
+	    params=''
+	    handle-as="json"
+	    method="POST"
+	    contentType="application/json"
+	    on-response="handleResponse"
+      last-response="{{response}}"
+	    debounce-duration="300"
+  	></iron-ajax>
+
+    <h1>Bark Bites Admin</h1>
+
+    <paper-input label="Place ID" value="{{placeId}}"></paper-input>
+
+    <paper-radio-group id="restrictionGroup" selected="{{selected}}">
+      <paper-radio-button name="inside">Inside</paper-radio-button>
+      <paper-radio-button name="patio">Patio</paper-radio-button>
+      <paper-radio-button name="patioPlus">Patio Plus</paper-radio-button>
+      <paper-radio-button name="outside">Outside of Patio</paper-radio-button>
+      <paper-radio-button name="none">Not Applicable / Not Allowed</paper-radio-button>
+    </paper-radio-group>
+
+    <paper-input id="notes-input" label="Enter Notes Here" value="{{barknotes}}"></paper-input>
+    <p>Your Notes: </p>
+    <p id="notes-section">{{barknotes}}</p>
+
+    <paper-button raised on-click="submitPlace">Submit BarkBite Place</paper-button>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'bb-admin-page',
+      properties: {
+        selected: {
+          type: String,
+          value: 'none'
+        }
+      },
+
+      submitPlace: function () {
+        var self = this;
+        if (self.placeId) {
+          var placeId = self.placeId;
+          var restriction = self.selected;
+          var notes = self.barknotes;
+
+          var body = {"petRestriction": restriction,
+                      "googlePlaceId": placeId,
+                      "notes": notes}
+
+          self.$.ajax.body = body;
+          self.$.ajax.generateRequest();
+        } else {
+          alert("Must Enter a Place ID");
+        }
+      },
+
+      handleResponse: function () {
+        alert(this.response);
+      }
+    });
+  </script>
+
+</dom-module>
