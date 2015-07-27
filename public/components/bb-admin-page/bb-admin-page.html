@@ -30,8 +30,12 @@
       padding: 0;
       margin: 0;
     }
-    paper-button {
+    #submit {
       background-color: blue;
+      color: white;
+    }
+    #delete {
+      background-color: red;
       color: white;
     }
     #notes-input {
@@ -74,7 +78,8 @@
     <p>Your Notes: </p>
     <p id="notes-section">{{barknotes}}</p>
 
-    <paper-button raised on-click="submitPlace">Submit BarkBite Place</paper-button>
+    <paper-button id="submit" raised on-click="submitPlace">Submit BarkBite Place</paper-button>
+    <paper-button id="delete" raised on-click="deletePlace">Delete</paper-button>
 
   </template>
 
@@ -102,6 +107,8 @@
               'notes': notes
             };
 
+          self.$.ajax.url = 'http://barkbites.noip.me:7000/api/v0/places';
+          self.$.ajax.method = 'POST';
           self.$.ajax.body = JSON.stringify(query);
           self.$.ajax.generateRequest();
         } else {
@@ -109,8 +116,21 @@
         }
       },
 
+      deletePlace: function () {
+        var self = this;
+        if (self.placeId) {
+          self.$.ajax.url = 'http://barkbites.noip.me:7000/api/v0/places/' + self.placeId;
+          self.$.ajax.method = 'DELETE';
+          self.$.ajax.generateRequest();
+        }
+      },
+
       handleResponse: function () {
-        alert(this.response.message);
+        if (this.response === null) {
+          alert('No response came back, check console errors. \n(inspect element -> console tab)');
+        } else {
+          alert('Message: ', this.response.message);
+        }
       }
     });
   </script>

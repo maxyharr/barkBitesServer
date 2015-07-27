@@ -54,9 +54,24 @@ router.route('/places/:id')
   })
 
   .delete(function (req, res) {
-    Place.remove({ _id: req.params.id }, function (err) {
-      if (err) res.sendStatus(err);
-      res.sendStatus(204);
+    var place = Place.count({googlePlaceId: req.params.id}, function (err, count) {
+      if (!count) {
+        var placeById = Place.count({_id: req.params.id}, function (err, count) {
+          if (!placeById) {
+            res.json({message: 'Place can not be deleted. Not Found in database.'});
+          } else {
+            Place.remove({_id: req.params.id}, function (err) {
+              if (err) res.json({message: err});
+              res.json({message: 'Place successfully deleted.'});
+            });
+          }
+        });
+      } else {
+        Place.remove({_googlePlaceId: req.params.id}, function (err) {
+          if (err) res.json({message: err});
+          res.json({message: 'Place successfully deleted.'});
+        });
+      }
     });
   })
 
