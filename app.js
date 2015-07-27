@@ -54,29 +54,15 @@ router.route('/places/:id')
   })
 
   .delete(function (req, res) {
-    var place = Place.count({googlePlaceId: req.params.id}, function (err, count) {
+    var GPID = req.params.id;
+    Place.count({googlePlaceId: GPID}, function (err, count) {
+      console.log(GPID);
+      console.log(count);
       if (!count) {
-        console.log('not found by googlePlaceID');
-        var placeById = Place.count({_id: req.params.id}, function (err, count) {
-          if (!placeById) {
-            console.log('Not found by ID');
-            res.json({message: 'Place can not be deleted. Not Found in database.'});
-          } else {
-            console.log('Found by ID');
-            Place.remove({_id: req.params.id}, function (err) {
-              if (err) res.json({message: err});
-              res.json({message: 'Place successfully deleted.'});
-            });
-          }
-        });
+        res.json({message: 'can not delete place, not found by googlePlaceId in database.'})
       } else {
-        console.log('Found by googlePlaceID');
-        Place.remove({_googlePlaceId: req.params.id}, function (err) {
-          if (err) res.json({message: err});
-          console.log(req.body.params);
-          Place.count({_googlePlaceId: req.params.id}, function (err, count) {
-            console.log(count);
-          });
+        Place.remove({googlePlaceId: GPID}, function (err) {
+          if (err) res.json({message: err.message});
           res.json({message: 'Place successfully deleted.'});
         });
       }
