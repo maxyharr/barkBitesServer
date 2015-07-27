@@ -72,7 +72,7 @@ router.route('/places/:id')
   });
 
 app.use('/api/v0', router);
-var port = process.env.PORT || 80;
+var port = process.env.PORT || 3000;
 var server = app.listen(port, function () {
   var host = server.address().address;
   var port = server.address().port;
