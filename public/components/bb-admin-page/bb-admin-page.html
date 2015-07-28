@@ -64,9 +64,10 @@
 
     <h1>Bark Bites Admin</h1>
 
+    <paper-input label="Place/Restaurant Name" value="{{name}}"></paper-input>
     <paper-input label="Place ID" value="{{placeId}}"></paper-input>
 
-    <paper-radio-group id="restrictionGroup" selected="{{selected}}">
+    <paper-radio-group id="restrictionGroup" selected="{{selectedRestriction}}">
       <paper-radio-button name="inside">Inside</paper-radio-button>
       <paper-radio-button name="patio">Patio</paper-radio-button>
       <paper-radio-button name="patioPlus">Patio Plus</paper-radio-button>
@@ -96,15 +97,12 @@
       submitPlace: function () {
         var self = this;
         if (self.placeId) {
-          var placeId = self.placeId;
-          var restriction = self.selected;
-          var notes = self.barknotes;
-
           var query =
             {
-              'googlePlaceId': placeId,
-              'petRestriction': restriction,
-              'notes': notes
+              'name': self.name,
+              'googlePlaceId': self.placeId,
+              'petRestriction': self.selectedRestriction,
+              'notes': self.barknotes
             };
 
           self.$.ajax.url = 'http://barkbites.noip.me:7000/api/v0/places';
