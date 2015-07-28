@@ -12,6 +12,9 @@
 <link rel="import" href="/bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="/bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="/bower_components/paper-button/paper-button.html">
+<link rel="import" href="/bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="/bower_components/paper-tabs/paper-tab.html">
+<link rel="import" href="/bower_components/iron-pages/iron-pages.html">
 
 <dom-module id="bb-admin-page">
 
@@ -49,6 +52,11 @@
     paper-input {
       display: block;
     }
+    paper-tab {
+      background-color: blue;
+      color: white;
+      font-size: 20px;
+    }
 
   </style>
 
@@ -67,23 +75,36 @@
 
     <h1>Bark Bites Admin</h1>
 
-    <paper-input label="Place Name" value="{{name}}"></paper-input>
-    <paper-input label="Place ID" value="{{placeId}}"></paper-input>
+    <paper-tabs selected="{{selectedTab}}">
+      <paper-tab>Add/Delete</paper-tab>
+      <paper-tab>Search/Update</paper-tab>
+    </paper-tabs>
 
-    <paper-radio-group id="restrictionGroup" selected="{{selectedRestriction}}">
-      <paper-radio-button name="inside">Inside</paper-radio-button>
-      <paper-radio-button name="patio">Patio</paper-radio-button>
-      <paper-radio-button name="patioPlus">Patio Plus</paper-radio-button>
-      <paper-radio-button name="outside">Outside of Patio</paper-radio-button>
-      <paper-radio-button name="none">Not Applicable / Not Allowed</paper-radio-button>
-    </paper-radio-group>
+    <iron-pages selected="{{selectedTab}}">
+      <div>
+        <paper-input label="Place Name" value="{{name}}"></paper-input>
+        <paper-input label="Place ID" value="{{placeId}}"></paper-input>
 
-    <paper-input id="notes-input" label="Enter Notes Here" value="{{barknotes}}"></paper-input>
-    <p>Your Notes: </p>
-    <p id="notes-section">{{barknotes}}</p>
+        <paper-radio-group id="restrictionGroup" selected="{{selectedRestriction}}">
+          <paper-radio-button name="inside">Inside</paper-radio-button>
+          <paper-radio-button name="patio">Patio</paper-radio-button>
+          <paper-radio-button name="patioPlus">Patio Plus</paper-radio-button>
+          <paper-radio-button name="outside">Outside of Patio</paper-radio-button>
+          <paper-radio-button name="none">Not Applicable / Not Allowed</paper-radio-button>
+        </paper-radio-group>
 
-    <paper-button id="submit" raised on-click="submitPlace">Submit BarkBite Place</paper-button>
-    <paper-button id="delete" raised on-click="deletePlace">Delete</paper-button>
+        <paper-input id="notes-input" label="Enter Notes Here" value="{{barknotes}}"></paper-input>
+        <p>Your Notes: </p>
+        <p id="notes-section">{{barknotes}}</p>
+
+        <paper-button id="submit" raised on-click="submitPlace">Submit BarkBite Place</paper-button>
+        <paper-button id="delete" raised on-click="deletePlace">Delete</paper-button>
+      </div>
+
+      <div>
+        <paper-input label="Search" value="{{searchField}}"></paper-input>
+      </div>
+    </iron-pages>
 
   </template>
 
@@ -91,9 +112,18 @@
     Polymer({
       is: 'bb-admin-page',
       properties: {
-        selected: {
+        selectedRestriction: {
           type: String,
           value: 'none'
+        },
+        selectedTab: {
+          type: Number,
+          value: 0
+        },
+        searchField: {
+          type: String,
+          value: '',
+          observer: 'searchFieldChanged'
         }
       },
 
@@ -128,11 +158,18 @@
 
       handleResponse: function () {
         if (this.response === null) {
-          alert('No response came back, check console errors. \n(inspect element -> console tab)');
+          console.log('No response came back, check console errors. \n(inspect element -> console tab)');
         } else {
           console.log(this.response);
-          alert('Message: ' + this.response.message);
+          //alert('Message: ' + this.response.message);
         }
+      },
+
+      searchFieldChanged: function () {
+        var self = this;
+        self.$.ajax.url = 'http://barkbites.noip.me:7000/api/v0/places/' + self.searchField;
+        self.$.ajax.method = 'GET';
+        self.$.ajax.generateRequest();
       }
     });
   </script>

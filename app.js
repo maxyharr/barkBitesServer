@@ -78,6 +78,16 @@ router.route('/places/:id')
       }
     });
   });
+router.route('/places/search/:searchString')
+  .get(function (req, res) {
+    var search = '/' + req.params.searchString + '/i';
+    Place.findOne({name: new RegExp(search)}, function (err, place) {
+      if (err) res.json({message: 'No places found with that name'});
+      res.status(200).json(place);
+    });
+  });
+
+
 
 app.use('/api/v0', router);
 var port = process.env.PORT || 7000;
