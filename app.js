@@ -56,8 +56,6 @@ router.route('/places/:id')
   .delete(function (req, res) {
     var GPID = req.params.id;
     Place.count({googlePlaceId: GPID}, function (err, count) {
-      console.log(GPID);
-      console.log(count);
       if (!count) {
         res.json({message: 'can not delete place, not found by googlePlaceId in database.'})
       } else {
@@ -70,18 +68,23 @@ router.route('/places/:id')
   })
 
   .put(function (req, res) {
-    Place.findOneAndUpdate({_id: req.params.id}, req.body, function (err, place) {
-      if (err) {
-        res.sendStatus(err);
+    var GPID = req.params.id;
+    Place.count({googlePlaceId: GPID}, function (err, count) {
+      if (!count) {
+        res.json({message: 'can not update place, not found by googlePlaceId in database.'})
       } else {
-        res.json(place);
+        Place.findOneAndUpdate({googlePlaceId: GPID}, req.body, function (err) {
+          if (err) res.json({message: err.message});
+          res.json({message: 'Place successfully updated.'});
+        });
       }
     });
   });
+
 router.route('/places/search/:searchString')
   .get(function (req, res) {
-    var search = '/' + req.params.searchString + '/i';
-    Place.findOne({name: new RegExp(search)}, function (err, place) {
+    console.log(req.params.searchString);
+    Place.findOne({'name': new RegExp(req.params.searchString, 'i') }, function (err, place) {
       if (err) res.json({message: 'No places found with that name'});
       res.status(200).json(place);
     });

@@ -33,7 +33,7 @@
       padding: 0;
       margin: 0;
     }
-    #submit {
+    .blueButton {
       background-color: blue;
       color: white;
     }
@@ -57,13 +57,16 @@
       color: white;
       font-size: 20px;
     }
+    .search {
+      background-color: #EEE;
+    }
 
   </style>
 
   <template>
   	<iron-ajax
       id="ajax"
-	    url="http://barkbites.noip.me:7000/api/v0/places"
+	    url="/api/v0/places"
 	    params=''
 	    handle-as="json"
 	    method="POST"
@@ -76,19 +79,20 @@
     <h1>Bark Bites Admin</h1>
 
     <paper-tabs selected="{{selectedTab}}">
-      <paper-tab>Add/Delete</paper-tab>
-      <paper-tab>Search/Update</paper-tab>
+      <paper-tab>Create / Update / Delete</paper-tab>
     </paper-tabs>
 
     <iron-pages selected="{{selectedTab}}">
       <div>
+        <paper-input class="search" label="Search for places already in barkbites database" value="{{searchString}}"></paper-input>
+
         <paper-input label="Place Name" value="{{name}}"></paper-input>
         <paper-input label="Place ID" value="{{placeId}}"></paper-input>
 
         <paper-radio-group id="restrictionGroup" selected="{{selectedRestriction}}">
           <paper-radio-button name="inside">Inside</paper-radio-button>
-          <paper-radio-button name="patio">Patio</paper-radio-button>
           <paper-radio-button name="patioPlus">Patio Plus</paper-radio-button>
+          <paper-radio-button name="patio">Patio</paper-radio-button>
           <paper-radio-button name="outside">Outside of Patio</paper-radio-button>
           <paper-radio-button name="none">Not Applicable / Not Allowed</paper-radio-button>
         </paper-radio-group>
@@ -97,12 +101,10 @@
         <p>Your Notes: </p>
         <p id="notes-section">{{barknotes}}</p>
 
-        <paper-button id="submit" raised on-click="submitPlace">Submit BarkBite Place</paper-button>
+        <paper-button id="submit" class="blueButton" raised on-click="submitPlace">Submit BarkBite Place</paper-button>
+        <paper-button id="update" class="blueButton" raised on-click="updatePlace">Update</paper-button>
         <paper-button id="delete" raised on-click="deletePlace">Delete</paper-button>
-      </div>
 
-      <div>
-        <paper-input label="Search" value="{{searchField}}"></paper-input>
       </div>
     </iron-pages>
 
@@ -120,10 +122,10 @@
           type: Number,
           value: 0
         },
-        searchField: {
+        searchString: {
           type: String,
           value: '',
-          observer: 'searchFieldChanged'
+          observer: 'searchStringChanged'
         }
       },
 
@@ -138,10 +140,35 @@
               'notes': self.barknotes
             };
 
-          self.$.ajax.url = 'http://barkbites.noip.me:7000/api/v0/places';
+          self.$.ajax.url = '/api/v0/places';
           self.$.ajax.method = 'POST';
           self.$.ajax.body = JSON.stringify(query);
           self.$.ajax.generateRequest();
+
+          self.cleanup();
+          self.searchString = '';
+        } else {
+          alert("Must Enter a Place ID");
+        }
+      },
+
+      updatePlace: function () {
+        var self = this;
+        if (self.placeId) {
+          var query =
+            {
+              'name': self.name,
+              'googlePlaceId': self.placeId,
+              'petRestriction': self.selectedRestriction,
+              'notes': self.barknotes
+            };
+
+          self.$.ajax.url = '/api/v0/places/' + self.placeId;
+          self.$.ajax.method = 'PUT';
+          self.$.ajax.body = JSON.stringify(query);
+          self.$.ajax.generateRequest();
+          self.cleanup();
+          self.searchString = '';
         } else {
           alert("Must Enter a Place ID");
         }
@@ -150,26 +177,56 @@
       deletePlace: function () {
         var self = this;
         if (self.placeId) {
-          self.$.ajax.url = 'http://barkbites.noip.me:7000/api/v0/places/' + self.placeId;
-          self.$.ajax.method = 'DELETE';
-          self.$.ajax.generateRequest();
+          var confirmed = confirm('are you sure you want to delete ' + self.name + '?');
+          if (confirmed) {
+            self.$.ajax.url = '/api/v0/places/' + self.placeId;
+            self.$.ajax.method = 'DELETE';
+            self.$.ajax.generateRequest();
+            self.cleanup();
+            self.searchString = '';
+          }
+        } else {
+          alert("Must Enter a Place ID");
         }
+      },
+
+      cleanup: function () {
+        this.name = '';
+        this.selectedRestriction = 'none';
+        this.barknotes = '';
+        this.placeId = '';
       },
 
       handleResponse: function () {
         if (this.response === null) {
+          this.cleanup();
           console.log('No response came back, check console errors. \n(inspect element -> console tab)');
-        } else {
-          console.log(this.response);
-          //alert('Message: ' + this.response.message);
+        } else if (typeof(this.response) === 'object') {
+          var name = this.response.name;
+          var petRestriction = this.response.petRestriction;
+          var notes = this.response.notes;
+          var placeId = this.response.googlePlaceId;
+
+          if (name) this.name = name;
+          if (petRestriction) this.selectedRestriction = petRestriction;
+          if (notes) this.barknotes = notes;
+          if (placeId) this.placeId = placeId;
+        }
+
+        if (this.response && this.response.message) {
+          console.log(this.response.message);
         }
       },
 
-      searchFieldChanged: function () {
+      searchStringChanged: function () {
         var self = this;
-        self.$.ajax.url = 'http://barkbites.noip.me:7000/api/v0/places/' + self.searchField;
-        self.$.ajax.method = 'GET';
-        self.$.ajax.generateRequest();
+        if (self.searchString !== '') {
+          self.$.ajax.url = '/api/v0/places/search/' + self.searchString;
+          self.$.ajax.method = 'GET';
+          self.$.ajax.generateRequest();
+        } else {
+          self.cleanup();
+        }
       }
     });
   </script>
