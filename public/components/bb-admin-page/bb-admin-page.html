@@ -15,6 +15,7 @@
 <link rel="import" href="/bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="/bower_components/paper-tabs/paper-tab.html">
 <link rel="import" href="/bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="bb-admin-viewall-page.html">
 
 <dom-module id="bb-admin-page">
 
@@ -80,31 +81,35 @@
 
     <paper-tabs selected="{{selectedTab}}">
       <paper-tab>Create / Update / Delete</paper-tab>
+      <paper-tab>View All</paper-tab>
     </paper-tabs>
 
     <iron-pages selected="{{selectedTab}}">
       <div>
-        <paper-input class="search" label="Search for places already in barkbites database" value="{{searchString}}"></paper-input>
+        <paper-input class="search" label="Search by Place Name" value="{{searchString}}"></paper-input>
 
         <paper-input label="Place Name" value="{{name}}"></paper-input>
-        <paper-input label="Place ID" value="{{placeId}}"></paper-input>
+        <paper-input label="Place ID" value="{{googlePlaceId}}"></paper-input>
 
-        <paper-radio-group id="restrictionGroup" selected="{{selectedRestriction}}">
+        <paper-radio-group id="restrictionGroup" selected="{{petRestriction}}">
           <paper-radio-button name="inside">Inside</paper-radio-button>
           <paper-radio-button name="patioPlus">Patio Plus</paper-radio-button>
           <paper-radio-button name="patio">Patio</paper-radio-button>
           <paper-radio-button name="outside">Outside of Patio</paper-radio-button>
           <paper-radio-button name="none">Not Applicable / Not Allowed</paper-radio-button>
-        </paper-radio-group>
+        </paper-radio-roup>
 
-        <paper-input id="notes-input" label="Enter Notes Here" value="{{barknotes}}"></paper-input>
+        <paper-input id="notes-input" label="Enter Notes Here" value="{{notes}}"></paper-input>
         <p>Your Notes: </p>
-        <p id="notes-section">{{barknotes}}</p>
+        <p id="notes-section">{{notes}}</p>
 
         <paper-button id="submit" class="blueButton" raised on-click="submitPlace">Submit BarkBite Place</paper-button>
         <paper-button id="update" class="blueButton" raised on-click="updatePlace">Update</paper-button>
         <paper-button id="delete" raised on-click="deletePlace">Delete</paper-button>
+      </div>
 
+      <div>
+        <bb-admin-viewall-page id="viewAll"></bb-admin-viewall-page>
       </div>
     </iron-pages>
 
@@ -114,7 +119,7 @@
     Polymer({
       is: 'bb-admin-page',
       properties: {
-        selectedRestriction: {
+        petRestriction: {
           type: String,
           value: 'none'
         },
@@ -131,13 +136,13 @@
 
       submitPlace: function () {
         var self = this;
-        if (self.placeId) {
+        if (self.googlePlaceId) {
           var query =
             {
               'name': self.name,
-              'googlePlaceId': self.placeId,
-              'petRestriction': self.selectedRestriction,
-              'notes': self.barknotes
+              'googlePlaceId': self.googlePlaceId,
+              'petRestriction': self.petRestriction,
+              'notes': self.notes
             };
 
           self.$.ajax.url = '/api/v0/places';
@@ -147,6 +152,7 @@
 
           self.cleanup();
           self.searchString = '';
+          self.$.viewAll.refresh();
         } else {
           alert("Must Enter a Place ID");
         }
@@ -154,21 +160,22 @@
 
       updatePlace: function () {
         var self = this;
-        if (self.placeId) {
+        if (self.googlePlaceId) {
           var query =
             {
               'name': self.name,
-              'googlePlaceId': self.placeId,
-              'petRestriction': self.selectedRestriction,
-              'notes': self.barknotes
+              'googlePlaceId': self.googlePlaceId,
+              'petRestriction': self.petRestriction,
+              'notes': self.notes
             };
 
-          self.$.ajax.url = '/api/v0/places/' + self.placeId;
+          self.$.ajax.url = '/api/v0/places/' + self.googlePlaceId;
           self.$.ajax.method = 'PUT';
           self.$.ajax.body = JSON.stringify(query);
           self.$.ajax.generateRequest();
           self.cleanup();
           self.searchString = '';
+          self.$.viewAll.refresh();
         } else {
           alert("Must Enter a Place ID");
         }
@@ -176,14 +183,15 @@
 
       deletePlace: function () {
         var self = this;
-        if (self.placeId) {
+        if (self.googlePlaceId) {
           var confirmed = confirm('are you sure you want to delete ' + self.name + '?');
           if (confirmed) {
-            self.$.ajax.url = '/api/v0/places/' + self.placeId;
+            self.$.ajax.url = '/api/v0/places/' + self.googlePlaceId;
             self.$.ajax.method = 'DELETE';
             self.$.ajax.generateRequest();
             self.cleanup();
             self.searchString = '';
+            self.$.viewAll.refresh();
           }
         } else {
           alert("Must Enter a Place ID");
@@ -192,29 +200,22 @@
 
       cleanup: function () {
         this.name = '';
-        this.selectedRestriction = 'none';
-        this.barknotes = '';
-        this.placeId = '';
+        this.petRestriction = 'none';
+        this.notes = '';
+        this.googlePlaceId = '';
       },
 
       handleResponse: function () {
         if (this.response === null) {
+          console.log('Nothing came back, try again');
           this.cleanup();
-          console.log('No response came back, check console errors. \n(inspect element -> console tab)');
-        } else if (typeof(this.response) === 'object') {
-          var name = this.response.name;
-          var petRestriction = this.response.petRestriction;
-          var notes = this.response.notes;
-          var placeId = this.response.googlePlaceId;
-
-          if (name) this.name = name;
-          if (petRestriction) this.selectedRestriction = petRestriction;
-          if (notes) this.barknotes = notes;
-          if (placeId) this.placeId = placeId;
         }
 
-        if (this.response && this.response.message) {
-          console.log(this.response.message);
+        else if (this.response.googlePlaceId){
+          this.name = this.response.name;
+          this.petRestriction = this.response.petRestriction;
+          this.notes = this.response.notes;
+          this.googlePlaceId = this.response.googlePlaceId;
         }
       },
 

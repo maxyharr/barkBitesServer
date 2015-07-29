@@ -1,0 +1,92 @@
+<link rel="import" href="/bower_components/polymer/polymer.html">
+
+<dom-module id="bb-admin-viewall-page">
+
+  <!-- scoped CSS for this element -->
+  <style>
+  	.firstColumn {
+  		background-color: black;
+  		color: white;
+  	}
+  	.secondColumn {
+  		background-color: salmon;
+  	}
+  	.thirdColumn {
+  		background-color: chartreuse;
+  	}
+  	.fourthColumn {
+  		background-color: pink;
+  	}
+  	table {
+  		width: 100%;
+  	}
+  </style>
+
+  <template>
+  	<iron-ajax
+        id="ajax"
+      	auto
+	    url="/api/v0/places"
+	    params=''
+	    handle-as="json"
+	    method="GET"
+	    content-type="application/json"
+      	last-response="{{places}}"
+	    debounce-duration="300"
+  	></iron-ajax>
+  	<paper-input label="Search by GPID, name, restriction" value="{{filterString}}"></paper-input>
+  	<table>
+  		<tr>
+	  		<th class="firstColumn">GPID (last 10)</th>
+	  		<th class="secondColumn">Name</th>
+	  		<th class="thirdColumn">Restriction</th>
+	  		<th class="fourthColumn">Notes</th>
+  		</tr>
+	  	<template is="dom-repeat" items="{{places}}" as="place">
+	  		<template is="dom-if" if="{{passesFilter(filterString, place, places)}}">
+		  		<tr class="row">
+		  			<td class="firstColumn">{{_lastTen(place.googlePlaceId)}}</td>
+		  			<td class="secondColumn">{{place.name}}</td>
+		  			<td class="thirdColumn">{{place.petRestriction}}</td>
+		  			<td class="fourthColumn">{{place.notes}}</td>
+		  		</tr>
+		  	</template>
+	  	</template>
+	</table>
+  </template>
+
+  <script>
+    Polymer({
+		is: "bb-admin-viewall-page",
+
+		_lastTen: function (str) {
+			if (str) {
+				return str.substr(str.length - 10);
+			} else {
+				return '';
+			}
+		},
+
+		passesFilter: function (filterString, place) {
+			if (filterString === '') {
+				return true;
+			}
+
+    		else if (
+    			place.googlePlaceId.toLowerCase().indexOf(filterString.toLowerCase()) > -1 ||
+    			place.name.toLowerCase().indexOf(filterString.toLowerCase()) > -1 ||
+    			place.petRestriction.toLowerCase().indexOf(filterString.toLowerCase()) > -1
+    		) { return true; }
+
+			else {
+				return false;
+			}
+		},
+
+		refresh: function () {
+			this.$.ajax.generateRequest();
+		}
+    });
+  </script>
+
+</dom-module>
