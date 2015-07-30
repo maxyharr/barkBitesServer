@@ -8,8 +8,11 @@ router.use(function (req, res, next) { next(); });
 var request = require('request');
 
 app.use(express.static(__dirname + '/public'));
-app.get('/', function(req, res) {
+app.get('/admin', function(req, res) {
   res.sendfile('./public/index.html'); // load the single view file
+});
+app.get('/', function(req, res) {
+  res.sendfile('./public/404.html');
 });
 
 // Mongo && models
