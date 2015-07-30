@@ -24,16 +24,6 @@
     paper-input {
       display: inline-block;
     }
-    paper-radio-group {
-      display: block;
-      margin-top: 10px;
-      margin-bottom: 10px;
-    }
-    paper-radio-button {
-      display: block;
-      padding: 0;
-      margin: 0;
-    }
     .blueButton {
       background-color: blue;
       color: white;
@@ -44,12 +34,11 @@
     }
     #notes-input {
       width: 100%;
+      height: 100px;
+      margin-top: 10px;
+      margin-bottom: 10px;
     }
 
-    #notes-section {
-      border: 1px solid black;
-      min-height: 20px;
-    }
     paper-input {
       display: block;
     }
@@ -58,8 +47,12 @@
       color: white;
       font-size: 20px;
     }
-    .search {
-      background-color: #EEE;
+    #sections {
+      display: flex;
+    }
+    .section {
+      width: 100%;
+      margin: 10px;
     }
 
   </style>
@@ -86,26 +79,30 @@
 
     <iron-pages selected="{{selectedTab}}">
       <div>
-        <paper-input class="search" label="Search by Place Name" value="{{searchString}}"></paper-input>
+        <div id="sections">
+          <div class="section">
+            <paper-input label="Search by Place Name" value="{{searchString}}"></paper-input>
+          </div>
+          <div class="section">
+            <paper-input label="Place Name" value="{{name}}"></paper-input>
+            <paper-input label="Place ID" value="{{googlePlaceId}}"></paper-input>
 
-        <paper-input label="Place Name" value="{{name}}"></paper-input>
-        <paper-input label="Place ID" value="{{googlePlaceId}}"></paper-input>
+            <paper-radio-group id="restrictionGroup" selected="{{petRestriction}}">
+              <paper-radio-button name="inside">Inside</paper-radio-button>
+              <paper-radio-button name="patioPlus">Patio Plus</paper-radio-button>
+              <paper-radio-button name="patio">Patio</paper-radio-button>
+              <paper-radio-button name="outside">Outside of Patio</paper-radio-button>
+              <paper-radio-button name="none">Not Applicable / Not Allowed</paper-radio-button>
+            </paper-radio-group>
 
-        <paper-radio-group id="restrictionGroup" selected="{{petRestriction}}">
-          <paper-radio-button name="inside">Inside</paper-radio-button>
-          <paper-radio-button name="patioPlus">Patio Plus</paper-radio-button>
-          <paper-radio-button name="patio">Patio</paper-radio-button>
-          <paper-radio-button name="outside">Outside of Patio</paper-radio-button>
-          <paper-radio-button name="none">Not Applicable / Not Allowed</paper-radio-button>
-        </paper-radio-roup>
+            <label>Your Notes: </label><br>
+            <textarea id="notes-input" value="{{notes}}"></textarea>
 
-        <paper-input id="notes-input" label="Enter Notes Here" value="{{notes}}"></paper-input>
-        <p>Your Notes: </p>
-        <p id="notes-section">{{notes}}</p>
-
-        <paper-button id="submit" class="blueButton" raised on-click="submitPlace">Submit BarkBite Place</paper-button>
-        <paper-button id="update" class="blueButton" raised on-click="updatePlace">Update</paper-button>
-        <paper-button id="delete" raised on-click="deletePlace">Delete</paper-button>
+            <paper-button id="submit" class="blueButton" raised on-click="submitPlace">Submit BarkBite Place</paper-button>
+            <paper-button id="update" class="blueButton" raised on-click="updatePlace">Update</paper-button>
+            <paper-button id="delete" raised on-click="deletePlace">Delete</paper-button>
+          </div>
+        </div>
       </div>
 
       <div>
@@ -134,7 +131,7 @@
         }
       },
 
-      submitPlace: function () {
+      submitPlace: function (event) {
         var self = this;
         if (self.googlePlaceId) {
           var query =
@@ -142,7 +139,7 @@
               'name': self.name,
               'googlePlaceId': self.googlePlaceId,
               'petRestriction': self.petRestriction,
-              'notes': self.notes
+              'notes': self.querySelector('#notes-input').value
             };
 
           self.$.ajax.url = '/api/v0/places';
@@ -166,7 +163,7 @@
               'name': self.name,
               'googlePlaceId': self.googlePlaceId,
               'petRestriction': self.petRestriction,
-              'notes': self.notes
+              'notes': self.querySelector('#notes-input').value
             };
 
           self.$.ajax.url = '/api/v0/places/' + self.googlePlaceId;

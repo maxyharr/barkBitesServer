@@ -4,21 +4,12 @@
 
   <!-- scoped CSS for this element -->
   <style>
-  	.firstColumn {
-  		background-color: black;
-  		color: white;
-  	}
-  	.secondColumn {
-  		background-color: salmon;
-  	}
-  	.thirdColumn {
-  		background-color: chartreuse;
-  	}
-  	.fourthColumn {
-  		background-color: pink;
-  	}
   	table {
   		width: 100%;
+  	}
+  	table * {
+  		border: 1px solid black;
+  		padding: 10px;
   	}
   </style>
 
@@ -37,18 +28,18 @@
   	<paper-input label="Search by GPID, name, restriction" value="{{filterString}}"></paper-input>
   	<table>
   		<tr>
-	  		<th class="firstColumn">GPID (last 10)</th>
-	  		<th class="secondColumn">Name</th>
-	  		<th class="thirdColumn">Restriction</th>
-	  		<th class="fourthColumn">Notes</th>
+	  		<th >GPID (last 10)</th>
+	  		<th >Name</th>
+	  		<th >Restriction</th>
+	  		<th >Notes</th>
   		</tr>
 	  	<template is="dom-repeat" items="{{places}}" as="place">
 	  		<template is="dom-if" if="{{passesFilter(filterString, place, places)}}">
 		  		<tr class="row">
-		  			<td class="firstColumn">{{_lastTen(place.googlePlaceId)}}</td>
-		  			<td class="secondColumn">{{place.name}}</td>
-		  			<td class="thirdColumn">{{place.petRestriction}}</td>
-		  			<td class="fourthColumn">{{place.notes}}</td>
+		  			<td >{{_lastTen(place.googlePlaceId)}}</td>
+		  			<td >{{place.name}}</td>
+		  			<td >{{place.petRestriction}}</td>
+		  			<td >{{place.notes}}</td>
 		  		</tr>
 		  	</template>
 	  	</template>
